@@ -54,16 +54,19 @@ aegis memory
 
 ## How `aegis init` Works
 
-Run it in your project root. Aegis scans your repo, sees what you're working with, and starts a discovery conversation — informed from the jump, not generic.
+Run it in your project root. Aegis scans your repo — not just the file tree, but the actual contents of your config files, documentation, CI workflows, and project structure. By the time the conversation starts, Aegis already knows your stack, your architecture, your build pipeline, and your patterns.
 
-It asks things like:
+If Aegis detects files that look sensitive — environment variables, credentials, database files — it skips them and tells you what it chose not to read. You decide whether it needs access. Nothing gets opened without your awareness.
 
-- *"Are there parts of this codebase agents should never touch?"*
-- *"When an agent wants to add a dependency, should it just do it or ask you first?"*
-- *"Will multiple agents ever work on this in parallel?"*
-- *"How should agents handle situations your policy doesn't cover?"*
+From there, the conversation is focused and specific. Aegis doesn't ask what language you're using — it already knows. Instead, it asks about the things it can't infer from code alone:
 
-By the end, your project has onboarding papers for every AI agent that will ever work here. Their role, their scope, the rules, the quality bar, what's already been tried, what failed and why. Every agent arrives on day one and knows exactly what to do.
+- Your guiding principles and what's non-negotiable
+- How much autonomy agents should have across different domains
+- Which files are sacred and which are fair game
+- How you want agents to coordinate when multiple roles are in play
+- What should happen when an agent hits ambiguity or a gap in the rules
+
+The conversation moves fast. Aegis confirms what it already knows, fills in what it doesn't, and when it has the full picture, your `.agentpolicy/` directory appears — complete, schema-validated, and ready for every agent that works here next.
 
 ## The `.agentpolicy/` Format
 

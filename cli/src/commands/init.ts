@@ -4,10 +4,12 @@
  * The main event. Scans the repo, starts a discovery conversation
  * with the human, and produces the .agentpolicy/ directory.
  *
- * There are no spinners or progress bars. Aegis just shows up.
+ * First-time: Zeus logo → shield zoom → conversation → files appear.
+ * Return visit: Short opener → conversation → files updated.
+ *
  * The scan happens quietly before the first message. The policy
- * gets written quietly after the last one. In between, it's just
- * two people talking.
+ * gets written quietly after the last one. In between, it's
+ * Aegis at work.
  */
 
 import { resolveApiKey } from "../config/api-key.js";
@@ -22,8 +24,6 @@ export async function initCommand(): Promise<void> {
   const ui = new TerminalUI();
 
   try {
-    ui.showWelcome();
-
     // Resolve API key (this may prompt interactively — that's fine,
     // it's a one-time setup moment, not a recurring UI pattern)
     const apiKey = await resolveApiKey();
@@ -48,6 +48,14 @@ export async function initCommand(): Promise<void> {
     saveMemory(memory);
     const projectMemory = getProjectMemory(memory, scan.projectName);
     const hasMemory = Object.keys(projectMemory).length > 0;
+
+    // First-time init: play the full intro sequence
+    // Return visit: quiet welcome
+    if (scan.hasExistingPolicy && hasMemory) {
+      ui.showWelcome();
+    } else {
+      await ui.playIntro();
+    }
 
     // Run the conversation — this is the whole thing
     const engine = new DiscoveryEngine(

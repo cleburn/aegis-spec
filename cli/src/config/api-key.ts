@@ -98,7 +98,7 @@ export async function resolveApiKey(): Promise<string> {
 
   // 3. Interactive prompt
   console.log("");
-  console.log("  Aegis needs an Anthropic API key to work.");
+  console.log("  Hi, please enter your Anthropic API key to get started.");
   console.log("  You can also set the ANTHROPIC_API_KEY environment variable.\n");
 
   const key = await prompt("  API key: ", true);

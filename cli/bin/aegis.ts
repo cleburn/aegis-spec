@@ -10,6 +10,9 @@
  *   aegis memory     See what Aegis remembers about you
  */
 
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { Command } from "commander";
 import { initCommand } from "../src/commands/init.js";
 import { explainCommand } from "../src/commands/explain.js";
@@ -20,12 +23,16 @@ import {
   memoryClearCommand,
 } from "../src/commands/memory.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const pkg = JSON.parse(readFileSync(join(__dirname, "../../package.json"), "utf-8"));
+
 const program = new Command();
 
 program
   .name("aegis")
   .description("The best colleague you've ever had — for every AI agent on your team.")
-  .version("0.1.0");
+  .version(pkg.version);
 
 program
   .command("init")

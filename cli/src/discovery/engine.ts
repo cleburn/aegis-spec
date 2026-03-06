@@ -3,10 +3,10 @@
  *
  * The beating heart of `aegis init`. Just a conversation loop.
  *
- * No progress bars. No phase indicators. No "compiling..." messages.
- * When Aegis needs to think, there's a natural pause. When policy
- * gets extracted, it happens quietly. The human's experience is:
- * they talked to someone smart, and then files appeared.
+ * When Aegis needs to think, there's a playful animation — Zeus
+ * throwing lightning, Einstein pacing. When policy gets extracted,
+ * the same animations keep the human company. The experience is:
+ * they talked to someone with real presence, and then files appeared.
  */
 
 import type { LLMProvider, Message } from "../llm/provider.js";
@@ -55,9 +55,9 @@ export class DiscoveryEngine {
    * Returns the compiled policy when complete.
    */
   async run(): Promise<DiscoveryResult> {
-    // Aegis opens. No preamble from the system — he just starts talking.
+    // Seed the conversation — the user ran "aegis init", that's the trigger
+    this.messages.push({ role: "user", content: "aegis init" });
     const opening = await this.getAegisResponse();
-    this.ui.showAegisMessage(opening);
 
     // Conversation loop
     while (true) {
@@ -86,13 +86,11 @@ export class DiscoveryEngine {
 
       // Check for completion signal
       if (response.includes("[DISCOVERY_COMPLETE]")) {
-        // Show the response without the marker
-        const cleanResponse = response.replace("[DISCOVERY_COMPLETE]", "").trim();
-        this.ui.showAegisMessage(cleanResponse);
+        // Let the user know to hang tight while files are generated
+        this.ui.showNote("Drafting your policy files...");
 
-        // Extract policy quietly — no "compiling..." message.
-        // From the human's perspective, Aegis just said goodbye
-        // and then files appeared.
+        // Extract policy — thinking animation keeps the human company
+        // while Aegis compiles everything behind the scenes.
         const policy = await this.extractPolicy();
 
         return {
@@ -101,23 +99,75 @@ export class DiscoveryEngine {
         };
       }
 
-      this.ui.showAegisMessage(response);
     }
   }
 
   /**
    * Get a streamed response from Aegis.
+   *
+   * Thinking animation starts on a 2-second timer. If the first token
+   * arrives before 2 seconds (the common case), no animation appears.
+   * If it takes longer, the animation fills the pause naturally.
+   *
+   * The stream is buffered to intercept [DISCOVERY_COMPLETE] so it
+   * never appears in the terminal. The buffer holds tokens until we're
+   * sure they don't contain the start of the marker, then flushes.
    */
   private async getAegisResponse(): Promise<string> {
-    this.ui.startAegisResponse();
+    // Start thinking timer — animation appears only if >2s passes
+    this.ui.startThinking();
+
+    const MARKER = "[DISCOVERY_COMPLETE]";
+    let firstToken = true;
+    let buffer = "";
+
+    const flushBuffer = () => {
+      // Only flush content we're sure doesn't contain the marker start
+      const safeLength = buffer.length - MARKER.length;
+      if (safeLength > 0) {
+        const safe = buffer.slice(0, safeLength);
+        buffer = buffer.slice(safeLength);
+        this.ui.streamToken(safe);
+      }
+    };
 
     const response = await this.provider.chatStream(
       this.messages,
       this.systemPrompt,
       (token) => {
-        this.ui.streamToken(token);
+        if (firstToken) {
+          // First token arrived — stop thinking animation, start streaming
+          this.ui.stopThinking();
+          this.ui.startAegisResponse();
+          firstToken = false;
+        }
+
+        buffer += token;
+
+        // If the buffer contains the full marker, strip it and flush the rest
+        if (buffer.includes(MARKER)) {
+          buffer = buffer.replace(MARKER, "");
+          this.ui.streamToken(buffer);
+          buffer = "";
+          return;
+        }
+
+        // Flush everything we're sure is safe
+        flushBuffer();
       }
     );
+
+    // Flush any remaining buffer (minus the marker if present)
+    if (buffer.length > 0) {
+      const cleaned = buffer.replace(MARKER, "");
+      this.ui.streamToken(cleaned);
+    }
+
+    // If we never got a token (empty response edge case), clean up
+    if (firstToken) {
+      this.ui.stopThinking();
+      this.ui.startAegisResponse();
+    }
 
     this.ui.endAegisResponse();
 
@@ -127,9 +177,13 @@ export class DiscoveryEngine {
 
   /**
    * After discovery, compile the conversation into structured policy.
-   * This happens silently — no UI feedback.
+   * Thinking animation runs during extraction since this is always
+   * a long operation — no 2-second threshold needed.
    */
   private async extractPolicy(): Promise<DiscoveryResult["policy"]> {
+    // Extraction is always slow — start thinking animation immediately
+    this.ui.startThinking();
+
     const extractionPrompt = buildExtractionSystemPrompt();
 
     const transcriptSummary = this.messages
@@ -147,6 +201,8 @@ export class DiscoveryEngine {
       extractionMessages,
       extractionPrompt
     );
+
+    this.ui.stopThinking();
 
     return policy;
   }
