@@ -1,0 +1,45 @@
+{
+  "$schema": "https://aegis.dev/schema/role.schema.json",
+  "version": "0.1.0",
+  "role": {
+    "name": "testing",
+    "purpose": "Test coverage, quality assurance, and validation. Writes and maintains integration tests, end-to-end tests, and ensures the quality gate is met across the entire project.",
+    "specialization": ["playwright", "pytest", "testing-strategy", "accessibility-testing", "api-testing"]
+  },
+  "scope": {
+    "primary_paths": ["tests/**"],
+    "secondary_paths": ["src/**", "services/**"],
+    "excluded_paths": ["infrastructure/**", "prisma/**", "config/**"]
+  },
+  "autonomy_overrides": {
+    "test_modification": "delegated",
+    "code_modification": "conservative",
+    "file_creation": "delegated"
+  },
+  "convention_overrides": [
+    {
+      "convention_id": "testing_pattern",
+      "override": {
+        "enforcement": "strict"
+      }
+    }
+  ],
+  "collaboration": {
+    "depends_on": ["frontend", "backend"],
+    "provides_to": [],
+    "shared_resources": [
+      {
+        "path": "src/shared/types.ts",
+        "protocol": "read_only"
+      },
+      {
+        "path": "tests/fixtures",
+        "protocol": "owns"
+      }
+    ],
+    "handoff": {
+      "signal_method": "ledger_update",
+      "deliverables": ["new or updated test files", "test coverage report", "list of discovered issues"]
+    }
+  }
+}

@@ -1,0 +1,171 @@
+{
+  "$schema": "https://aegis.dev/schema/governance.schema.json",
+  "version": "0.1.0",
+  "autonomy": {
+    "default_level": "advisory",
+    "domains": {
+      "code_modification": "delegated",
+      "dependency_management": "advisory",
+      "file_creation": "delegated",
+      "file_deletion": "advisory",
+      "configuration_changes": "conservative",
+      "infrastructure_changes": "conservative",
+      "agent_recruitment": "advisory",
+      "test_modification": "delegated",
+      "documentation": "delegated",
+      "refactoring": "advisory"
+    }
+  },
+  "permissions": {
+    "boundaries": {
+      "writable": [
+        "src/**",
+        "services/**",
+        "tests/**",
+        "docs/**"
+      ],
+      "read_only": [
+        "config/**",
+        ".github/**",
+        "prisma/schema.prisma"
+      ],
+      "forbidden": [
+        ".env*",
+        "secrets/**",
+        "infrastructure/**",
+        "*.pem",
+        "*.key"
+      ]
+    },
+    "sensitive_patterns": [
+      {
+        "pattern": "API_KEY_.*",
+        "reason": "API credentials must never appear in code or logs."
+      },
+      {
+        "pattern": ".*_SECRET",
+        "reason": "Secret values must only be referenced via environment variables."
+      },
+      {
+        "pattern": "DATABASE_URL",
+        "reason": "Database connection strings contain credentials."
+      },
+      {
+        "pattern": "password",
+        "reason": "Never hardcode or log passwords."
+      }
+    ]
+  },
+  "quality_gate": {
+    "pre_commit": {
+      "must_pass_tests": true,
+      "must_pass_lint": true,
+      "must_pass_typecheck": true,
+      "must_add_tests": true,
+      "must_update_docs": false,
+      "max_files_changed": 15,
+      "custom_checks": [
+        {
+          "name": "prisma_validate",
+          "command": "pnpm exec prisma validate",
+          "description": "Ensure Prisma schema is valid after any model changes."
+        },
+        {
+          "name": "no_console_logs",
+          "command": "grep -rn 'console.log' src/ --include='*.ts' --include='*.tsx' | grep -v '// debug-ok' && exit 1 || exit 0",
+          "description": "No console.log statements in production code unless marked // debug-ok."
+        }
+      ]
+    }
+  },
+  "conventions": [
+    {
+      "id": "component_style",
+      "scope": "src/frontend/**",
+      "rule": "component_style",
+      "value": "functional",
+      "forbidden": ["class components"],
+      "enforcement": "strict",
+      "rationale": "Functional components with hooks are the project standard. No class components."
+    },
+    {
+      "id": "state_management",
+      "scope": "src/frontend/**",
+      "rule": "state_management",
+      "allowed": ["zustand", "tanstack-query"],
+      "forbidden": ["redux", "mobx", "recoil", "context-for-global-state"],
+      "enforcement": "strict",
+      "rationale": "Zustand for client state, TanStack Query for server state. No exceptions."
+    },
+    {
+      "id": "error_handling_api",
+      "scope": "services/api/**",
+      "rule": "error_handling",
+      "value": "result_type",
+      "forbidden": ["bare exceptions", "generic try-catch"],
+      "enforcement": "strict",
+      "rationale": "All API functions return typed Result objects. Never swallow exceptions silently."
+    },
+    {
+      "id": "error_handling_frontend",
+      "scope": "src/frontend/**",
+      "rule": "error_handling",
+      "value": "error_boundary",
+      "enforcement": "preferred",
+      "rationale": "Use React error boundaries for component-level failures. Page-level errors go through the global handler."
+    },
+    {
+      "id": "naming_files",
+      "scope": "global",
+      "rule": "naming",
+      "value": "kebab-case",
+      "enforcement": "strict",
+      "rationale": "All filenames use kebab-case. No camelCase, no PascalCase, no underscores in filenames."
+    },
+    {
+      "id": "naming_functions",
+      "scope": "src/**",
+      "rule": "naming",
+      "value": "camelCase",
+      "enforcement": "strict",
+      "rationale": "Functions and variables use camelCase. React components use PascalCase."
+    },
+    {
+      "id": "naming_python",
+      "scope": "services/**",
+      "rule": "naming",
+      "value": "snake_case",
+      "enforcement": "strict",
+      "rationale": "Python code follows PEP 8 naming — snake_case for functions and variables."
+    },
+    {
+      "id": "imports_frontend",
+      "scope": "src/frontend/**",
+      "rule": "imports",
+      "value": "absolute",
+      "enforcement": "preferred",
+      "rationale": "Use absolute imports with the @/ alias. Relative imports only within the same directory."
+    },
+    {
+      "id": "testing_pattern",
+      "scope": "tests/**",
+      "rule": "testing_pattern",
+      "value": "arrange_act_assert",
+      "enforcement": "preferred",
+      "rationale": "Tests follow AAA pattern. Each test has clear setup, execution, and assertion sections."
+    },
+    {
+      "id": "api_validation",
+      "scope": "services/api/**",
+      "rule": "architecture_pattern",
+      "value": "validate_at_boundary",
+      "enforcement": "strict",
+      "rationale": "All incoming data is validated with Pydantic at the API boundary. Internal functions trust their inputs."
+    }
+  ],
+  "escalation": {
+    "on_ambiguity": "best_judgment_and_flag",
+    "on_conflict": "principles_win",
+    "on_scope_boundary": "flag_and_suggest"
+  }
+}

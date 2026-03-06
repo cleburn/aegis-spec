@@ -1,0 +1,186 @@
+{
+  "$schema": "https://aegis.dev/schema/ledger.schema.json",
+  "version": "0.1.0",
+  "last_updated": "2025-03-03T14:22:00Z",
+  "sequence": 14,
+  "write_protocol": {
+    "lock_file": ".agentpolicy/state/ledger.lock",
+    "lock_timeout_seconds": 120,
+    "retry_interval_ms": 500,
+    "max_retries": 10,
+    "procedure": [
+      {
+        "step": 1,
+        "action": "Check if ledger.lock exists. If it exists and its timestamp is within lock_timeout_seconds, wait retry_interval_ms and retry up to max_retries times. If it exists but is older than lock_timeout_seconds, it is stale — delete it and proceed."
+      },
+      {
+        "step": 2,
+        "action": "Create ledger.lock containing your role name and the current ISO 8601 timestamp."
+      },
+      {
+        "step": 3,
+        "action": "Read ledger.json and note the current sequence number."
+      },
+      {
+        "step": 4,
+        "action": "Make your changes to the ledger data in memory. Increment the sequence number by 1. Update last_updated to the current timestamp."
+      },
+      {
+        "step": 5,
+        "action": "Re-read ledger.json. If the sequence number has changed since step 3, another agent wrote concurrently despite the lock. Discard your changes, delete your lock, and restart from step 1."
+      },
+      {
+        "step": 6,
+        "action": "Write the updated ledger.json to disk."
+      },
+      {
+        "step": 7,
+        "action": "Delete ledger.lock."
+      }
+    ]
+  },
+  "tasks": [
+    {
+      "id": "feat_contact_search",
+      "status": "completed",
+      "summary": "Add full-text search to the contacts list with debounced input and server-side filtering.",
+      "assigned_role": "frontend",
+      "created_at": "2025-03-01T09:00:00Z",
+      "updated_at": "2025-03-02T11:30:00Z",
+      "files_touched": [
+        "src/frontend/components/contact-search.tsx",
+        "src/frontend/hooks/use-debounced-search.ts",
+        "src/shared/types.ts"
+      ],
+      "outcome": {
+        "summary": "Search component with 300ms debounce, integrated with existing contacts API. Added SearchParams type to shared types.",
+        "files_created": [
+          "src/frontend/components/contact-search.tsx",
+          "src/frontend/hooks/use-debounced-search.ts"
+        ],
+        "files_modified": [
+          "src/shared/types.ts"
+        ],
+        "tests_added": 3,
+        "completed_at": "2025-03-02T11:30:00Z"
+      },
+      "notes": [
+        {
+          "timestamp": "2025-03-01T15:00:00Z",
+          "author_role": "frontend",
+          "content": "Considered using a third-party search component but built custom to stay consistent with existing UI patterns."
+        }
+      ]
+    },
+    {
+      "id": "feat_search_api",
+      "status": "completed",
+      "summary": "Add search endpoint to contacts API with full-text PostgreSQL search and pagination.",
+      "assigned_role": "backend",
+      "created_at": "2025-03-01T09:00:00Z",
+      "updated_at": "2025-03-01T16:45:00Z",
+      "files_touched": [
+        "services/api/routes/contacts.py",
+        "services/api/queries/contact_search.py"
+      ],
+      "outcome": {
+        "summary": "GET /api/contacts/search endpoint with q, limit, offset params. Uses PostgreSQL ts_vector for full-text search.",
+        "files_created": [
+          "services/api/queries/contact_search.py"
+        ],
+        "files_modified": [
+          "services/api/routes/contacts.py"
+        ],
+        "tests_added": 5,
+        "completed_at": "2025-03-01T16:45:00Z"
+      }
+    },
+    {
+      "id": "feat_deal_pipeline_view",
+      "status": "in_progress",
+      "summary": "Build a kanban-style pipeline view for deals, with drag-and-drop between stages.",
+      "assigned_role": "frontend",
+      "created_at": "2025-03-03T09:00:00Z",
+      "updated_at": "2025-03-03T14:22:00Z",
+      "files_touched": [
+        "src/frontend/pages/deals/pipeline.tsx",
+        "src/frontend/components/deal-card.tsx"
+      ],
+      "depends_on": ["feat_deal_stages_api"],
+      "notes": [
+        {
+          "timestamp": "2025-03-03T10:15:00Z",
+          "author_role": "frontend",
+          "content": "Using @dnd-kit/core for drag-and-drop since it has better accessibility support than react-beautiful-dnd."
+        },
+        {
+          "timestamp": "2025-03-03T14:22:00Z",
+          "author_role": "frontend",
+          "content": "Board layout done. Drag-and-drop wired up locally. Waiting on deal stages API to connect real data."
+        }
+      ]
+    },
+    {
+      "id": "feat_deal_stages_api",
+      "status": "in_progress",
+      "summary": "API endpoints for deal pipeline stages: list stages, move deal between stages, reorder stages.",
+      "assigned_role": "backend",
+      "created_at": "2025-03-03T09:00:00Z",
+      "updated_at": "2025-03-03T13:00:00Z",
+      "files_touched": [
+        "services/api/routes/deals.py",
+        "services/api/models/deal_stage.py"
+      ]
+    },
+    {
+      "id": "fix_csv_export_encoding",
+      "status": "failed",
+      "summary": "Fix CSV export producing garbled characters for contacts with non-ASCII names.",
+      "assigned_role": "backend",
+      "created_at": "2025-03-02T10:00:00Z",
+      "updated_at": "2025-03-02T14:30:00Z",
+      "files_touched": [
+        "services/api/routes/export.py"
+      ],
+      "failure_log": {
+        "approach": "Switched CSV writer to use utf-8-sig encoding with BOM header for Excel compatibility.",
+        "error": "Fixed the encoding but broke the existing import pipeline which expects utf-8 without BOM. The import service is in infrastructure/ which is outside agent scope.",
+        "attempted_at": "2025-03-02T14:30:00Z",
+        "retry_recommended": true
+      },
+      "notes": [
+        {
+          "timestamp": "2025-03-02T14:30:00Z",
+          "author_role": "backend",
+          "content": "This needs a coordinated change: export with BOM and update the import service to handle both. Import service is in infrastructure/ — needs human or a role with access to that scope."
+        }
+      ]
+    },
+    {
+      "id": "test_search_e2e",
+      "status": "blocked",
+      "summary": "End-to-end test for the contact search flow: type query, see filtered results, clear search.",
+      "assigned_role": "testing",
+      "created_at": "2025-03-02T12:00:00Z",
+      "updated_at": "2025-03-03T09:30:00Z",
+      "depends_on": ["feat_contact_search", "feat_search_api"],
+      "blocked_reason": "Playwright test environment cannot connect to the test database. The DATABASE_URL in the test config appears to be pointing at a stale instance.",
+      "notes": [
+        {
+          "timestamp": "2025-03-03T09:30:00Z",
+          "author_role": "testing",
+          "content": "Both dependent features are complete. Blocked purely on test environment config — likely needs human to update .env.test."
+        }
+      ]
+    }
+  ],
+  "locks": [
+    {
+      "resource": "src/shared/types.ts",
+      "held_by": "frontend",
+      "acquired_at": "2025-03-03T14:00:00Z",
+      "reason": "Adding DealStage and PipelineView types for the deal pipeline feature.",
+      "expires_at": "2025-03-03T16:00:00Z"
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "$schema": "https://aegis.dev/schema/constitution.schema.json",
+  "version": "0.1.0",
+  "project": {
+    "name": "relay-crm",
+    "purpose": "A B2B SaaS platform for managing customer relationships and sales pipelines, serving mid-size companies. Speed of iteration and data integrity are prioritized over feature breadth.",
+    "architecture": "monorepo",
+    "module_map": [
+      {
+        "path": "src/frontend",
+        "purpose": "Next.js web application — all UI, pages, and client-side state.",
+        "owner": "frontend",
+        "internal_dependencies": ["src/shared"]
+      },
+      {
+        "path": "services/api",
+        "purpose": "FastAPI backend — REST endpoints, business logic, and database access.",
+        "owner": "backend",
+        "internal_dependencies": ["src/shared", "services/auth"]
+      },
+      {
+        "path": "services/auth",
+        "purpose": "Authentication and authorization service.",
+        "owner": "backend"
+      },
+      {
+        "path": "src/shared",
+        "purpose": "Shared TypeScript types, constants, and utilities used by both frontend and backend."
+      },
+      {
+        "path": "infrastructure",
+        "purpose": "Terraform configs, Docker setup, and CI/CD pipelines. Human-managed only."
+      },
+      {
+        "path": "tests",
+        "purpose": "Integration and end-to-end test suites.",
+        "owner": "testing",
+        "internal_dependencies": ["src/frontend", "services/api"]
+      }
+    ]
+  },
+  "tech_stack": {
+    "languages": ["typescript", "python"],
+    "frameworks": ["next.js", "fastapi", "prisma"],
+    "infrastructure": ["aws", "terraform", "docker", "github-actions"],
+    "package_managers": ["pnpm", "pip"],
+    "key_libraries": [
+      {
+        "name": "zustand",
+        "purpose": "Client-side state management.",
+        "scope": "src/frontend"
+      },
+      {
+        "name": "tanstack-query",
+        "purpose": "Server state, caching, and data fetching.",
+        "scope": "src/frontend"
+      },
+      {
+        "name": "zod",
+        "purpose": "Runtime schema validation for API boundaries.",
+        "scope": "global"
+      },
+      {
+        "name": "pydantic",
+        "purpose": "Data validation and settings management in Python services.",
+        "scope": "services"
+      },
+      {
+        "name": "pytest",
+        "purpose": "Python test framework.",
+        "scope": "services"
+      },
+      {
+        "name": "playwright",
+        "purpose": "End-to-end browser testing.",
+        "scope": "tests"
+      }
+    ]
+  },
+  "principles": [
+    {
+      "name": "data_integrity_first",
+      "statement": "Customer data is sacred. Never ship a change that risks data loss, corruption, or unauthorized access. When in doubt, add a validation layer.",
+      "priority": 1
+    },
+    {
+      "name": "ship_small",
+      "statement": "Prefer small, scoped changes over large rewrites. Every PR should be reviewable in under 15 minutes. If a task is growing beyond its scope, split it.",
+      "priority": 2
+    },
+    {
+      "name": "simplicity_over_cleverness",
+      "statement": "Write code that a new team member could understand in one read. Avoid premature abstraction, clever patterns, and unnecessary indirection.",
+      "priority": 3
+    },
+    {
+      "name": "test_the_boundaries",
+      "statement": "Focus testing effort on API boundaries, data transformations, and user-facing flows. Don't test implementation details.",
+      "priority": 4
+    },
+    {
+      "name": "accessible_by_default",
+      "statement": "All UI components must meet WCAG 2.1 AA. Accessibility is a requirement, not a nice-to-have.",
+      "priority": 5
+    }
+  ],
+  "build_commands": {
+    "install": "pnpm install",
+    "build": "pnpm build",
+    "test": "pnpm test",
+    "lint": "pnpm lint",
+    "typecheck": "pnpm typecheck",
+    "dev": "pnpm dev",
+    "custom": [
+      {
+        "name": "test:e2e",
+        "command": "pnpm exec playwright test",
+        "purpose": "Run end-to-end browser tests."
+      },
+      {
+        "name": "test:api",
+        "command": "cd services/api && pytest",
+        "purpose": "Run backend API tests."
+      },
+      {
+        "name": "db:migrate",
+        "command": "pnpm exec prisma migrate dev",
+        "purpose": "Apply pending database migrations."
+      }
+    ]
+  }
+}

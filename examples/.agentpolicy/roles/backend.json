@@ -1,0 +1,36 @@
+{
+  "$schema": "https://aegis.dev/schema/role.schema.json",
+  "version": "0.1.0",
+  "role": {
+    "name": "backend",
+    "purpose": "Backend API development, database interactions, authentication, and business logic. Owns everything behind the API boundary.",
+    "specialization": ["python", "fastapi", "prisma", "postgresql", "pydantic", "rest-api-design"]
+  },
+  "scope": {
+    "primary_paths": ["services/api/**", "services/auth/**"],
+    "secondary_paths": ["src/shared/**", "prisma/**"],
+    "excluded_paths": ["src/frontend/**", "src/components/**", "public/**", "infrastructure/**"]
+  },
+  "autonomy_overrides": {
+    "refactoring": "delegated",
+    "configuration_changes": "advisory"
+  },
+  "collaboration": {
+    "depends_on": [],
+    "provides_to": ["frontend", "testing"],
+    "shared_resources": [
+      {
+        "path": "src/shared/types.ts",
+        "protocol": "coordinate"
+      },
+      {
+        "path": "prisma/schema.prisma",
+        "protocol": "read_only"
+      }
+    ],
+    "handoff": {
+      "signal_method": "ledger_update",
+      "deliverables": ["updated API endpoints", "passing pytest suite", "updated API types in src/shared"]
+    }
+  }
+}

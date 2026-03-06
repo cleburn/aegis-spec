@@ -1,0 +1,45 @@
+{
+  "$schema": "https://aegis.dev/schema/role.schema.json",
+  "version": "0.1.0",
+  "role": {
+    "name": "frontend",
+    "purpose": "Frontend development including UI components, pages, client-side state, and styling. Owns everything the user sees.",
+    "specialization": ["react", "next.js", "typescript", "css", "accessibility", "zustand", "tanstack-query"]
+  },
+  "scope": {
+    "primary_paths": ["src/frontend/**", "src/components/**", "public/**"],
+    "secondary_paths": ["src/shared/**"],
+    "excluded_paths": ["services/api/**", "services/auth/**", "infrastructure/**", "prisma/**"]
+  },
+  "autonomy_overrides": {
+    "refactoring": "delegated",
+    "documentation": "delegated",
+    "dependency_management": "conservative"
+  },
+  "convention_overrides": [
+    {
+      "convention_id": "imports_frontend",
+      "override": {
+        "enforcement": "strict"
+      }
+    }
+  ],
+  "collaboration": {
+    "depends_on": ["backend"],
+    "provides_to": ["testing"],
+    "shared_resources": [
+      {
+        "path": "src/shared/types.ts",
+        "protocol": "coordinate"
+      },
+      {
+        "path": "src/shared/constants.ts",
+        "protocol": "append_only"
+      }
+    ],
+    "handoff": {
+      "signal_method": "ledger_update",
+      "deliverables": ["updated source files", "passing lint and typecheck", "component-level tests"]
+    }
+  }
+}

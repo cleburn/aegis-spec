@@ -1,0 +1,247 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aegis.dev/schema/ledger.schema.json",
+  "title": "Aegis Ledger",
+  "description": "The shared operational state of the workspace. Unlike the other policy files which are set by the human through Aegis, the ledger is actively read and written by agents during work. It tracks what is happening, what has been done, what failed, and what is blocked. This prevents agents from re-exploring dead ends or duplicating work.",
+  "type": "object",
+  "required": ["version", "sequence", "tasks"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to the Aegis ledger schema for validation."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Aegis schema version this file conforms to."
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of the last ledger modification."
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Monotonically incrementing write counter. Every successful write to the ledger increments this by 1. Agents use this to detect concurrent modifications: read the sequence before making changes, then verify it has not changed before writing. If it has changed, the agent must re-read the ledger and reconcile before retrying."
+    },
+    "write_protocol": {
+      "type": "object",
+      "description": "The concurrency protocol governing how agents read and write the ledger. Because multiple agents may operate in parallel, all ledger writes must follow this protocol to prevent data loss or corruption. The protocol uses a lock file and sequence checking to ensure only one agent writes at a time.",
+      "additionalProperties": false,
+      "properties": {
+        "lock_file": {
+          "type": "string",
+          "default": ".agentpolicy/state/ledger.lock",
+          "description": "Path to the lock file relative to project root. Before writing, an agent creates this file. If it already exists and is not stale, the agent must wait and retry. The lock file contains the role name of the holder and the acquisition timestamp."
+        },
+        "lock_timeout_seconds": {
+          "type": "integer",
+          "minimum": 10,
+          "default": 120,
+          "description": "If a lock file is older than this many seconds, it is considered stale and may be broken by another agent. Prevents dead locks from permanently blocking ledger writes."
+        },
+        "retry_interval_ms": {
+          "type": "integer",
+          "minimum": 100,
+          "default": 500,
+          "description": "How long an agent should wait before retrying when the lock is held by another agent."
+        },
+        "max_retries": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 10,
+          "description": "Maximum number of retry attempts before the agent gives up and flags the situation for human attention."
+        },
+        "procedure": {
+          "type": "array",
+          "description": "The ordered steps every agent must follow when writing to the ledger. This is the canonical write protocol.",
+          "items": {
+            "type": "object",
+            "required": ["step", "action"],
+            "additionalProperties": false,
+            "properties": {
+              "step": {
+                "type": "integer",
+                "description": "Step number in the protocol sequence."
+              },
+              "action": {
+                "type": "string",
+                "description": "What the agent must do at this step."
+              }
+            }
+          }
+        }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "description": "The task log. Every unit of work — in progress, completed, or failed — is recorded here.",
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "summary", "assigned_role", "created_at"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique task identifier.",
+            "examples": ["task_001", "feat_dark_mode", "fix_auth_bug"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "in_progress", "blocked", "completed", "failed", "abandoned"],
+            "description": "Current state of the task."
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "What this task is doing, in one to two sentences."
+          },
+          "assigned_role": {
+            "type": "string",
+            "description": "The role name responsible for this task.",
+            "examples": ["default", "frontend", "backend"]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When this task was created."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When this task was last updated."
+          },
+          "files_touched": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Files modified during this task. Helps other agents understand what has changed."
+          },
+          "depends_on": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Task IDs that must complete before this task can proceed."
+          },
+          "blocked_reason": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "If status is 'blocked', explain why. This helps the human or Aegis resolve the blocker."
+          },
+          "failure_log": {
+            "type": "object",
+            "description": "If status is 'failed', record what was attempted and why it failed. This is critical — it prevents future agents from retrying the same approach.",
+            "additionalProperties": false,
+            "properties": {
+              "approach": {
+                "type": "string",
+                "maxLength": 500,
+                "description": "What was attempted."
+              },
+              "error": {
+                "type": "string",
+                "maxLength": 500,
+                "description": "What went wrong."
+              },
+              "attempted_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "retry_recommended": {
+                "type": "boolean",
+                "description": "Whether a different approach might succeed, or if this task should be escalated to the human."
+              }
+            }
+          },
+          "outcome": {
+            "type": "object",
+            "description": "If status is 'completed', record what was delivered.",
+            "additionalProperties": false,
+            "properties": {
+              "summary": {
+                "type": "string",
+                "maxLength": 300,
+                "description": "What was accomplished."
+              },
+              "files_created": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "files_modified": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "tests_added": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Number of tests added."
+              },
+              "completed_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "notes": {
+            "type": "array",
+            "description": "Timestamped entries for anything an agent wants future agents or the human to know about this task.",
+            "items": {
+              "type": "object",
+              "required": ["timestamp", "author_role", "content"],
+              "additionalProperties": false,
+              "properties": {
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "author_role": {
+                  "type": "string",
+                  "description": "Which role wrote this note.",
+                  "examples": ["frontend", "aegis", "human"]
+                },
+                "content": {
+                  "type": "string",
+                  "maxLength": 500
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "locks": {
+      "type": "array",
+      "description": "Active resource locks. When a role is modifying a shared resource, it registers a lock here. Other roles check before modifying the same resource.",
+      "items": {
+        "type": "object",
+        "required": ["resource", "held_by", "acquired_at"],
+        "additionalProperties": false,
+        "properties": {
+          "resource": {
+            "type": "string",
+            "description": "Path or identifier of the locked resource.",
+            "examples": ["prisma/schema.prisma", "src/shared/types.ts"]
+          },
+          "held_by": {
+            "type": "string",
+            "description": "Role name holding the lock."
+          },
+          "acquired_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Why this lock was acquired."
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Optional expiration. Prevents stale locks from blocking work indefinitely."
+          }
+        }
+      }
+    }
+  }
+}

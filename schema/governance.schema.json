@@ -1,0 +1,281 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aegis.dev/schema/governance.schema.json",
+  "title": "Aegis Governance",
+  "description": "The global operating rules that apply to every agent in this workspace, regardless of role. This is the employee handbook — the policies everyone must follow.",
+  "type": "object",
+  "required": ["version", "autonomy", "permissions", "quality_gate"],
+  "additionalProperties": false,
+  "definitions": {
+    "autonomy_level": {
+      "type": "string",
+      "enum": ["conservative", "advisory", "delegated"],
+      "description": "conservative: Agent never acts without explicit human approval. advisory: Agent surfaces recommendations and waits for approval. delegated: Agent acts on its own judgment and reports afterward."
+    },
+    "enforcement_level": {
+      "type": "string",
+      "enum": ["strict", "preferred", "suggestion"],
+      "description": "strict: Violation is never acceptable. preferred: Follow unless there is a compelling reason not to. suggestion: Consider this but use judgment."
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to the Aegis governance schema for validation."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Aegis schema version this file conforms to."
+    },
+    "autonomy": {
+      "type": "object",
+      "description": "The autonomy framework. For each operational domain, how much independent authority do agents have? This is the CEO telling the COO which decisions require a phone call and which can be handled independently.",
+      "required": ["default_level"],
+      "additionalProperties": false,
+      "properties": {
+        "default_level": {
+          "$ref": "#/definitions/autonomy_level",
+          "description": "The fallback autonomy level for any domain not explicitly configured."
+        },
+        "domains": {
+          "type": "object",
+          "description": "Override autonomy levels for specific operational domains.",
+          "additionalProperties": false,
+          "properties": {
+            "code_modification": {
+              "$ref": "#/definitions/autonomy_level",
+              "description": "Writing or modifying source code files."
+            },
+            "dependency_management": {
+              "$ref": "#/definitions/autonomy_level",
+              "description": "Adding, removing, or updating project dependencies."
+            },
+            "file_creation": {
+              "$ref": "#/definitions/autonomy_level",
+              "description": "Creating new files or directories."
+            },
+            "file_deletion": {
+              "$ref": "#/definitions/autonomy_level",
+              "description": "Deleting existing files or directories."
+            },
+            "configuration_changes": {
+              "$ref": "#/definitions/autonomy_level",
+              "description": "Modifying config files, environment variables, CI/CD pipelines."
+            },
+            "infrastructure_changes": {
+              "$ref": "#/definitions/autonomy_level",
+              "description": "Modifying infrastructure-as-code, deployment configs, cloud resources."
+            },
+            "agent_recruitment": {
+              "$ref": "#/definitions/autonomy_level",
+              "description": "Creating new scoped roles or recommending multi-agent workflows."
+            },
+            "test_modification": {
+              "$ref": "#/definitions/autonomy_level",
+              "description": "Adding, modifying, or removing tests."
+            },
+            "documentation": {
+              "$ref": "#/definitions/autonomy_level",
+              "description": "Creating or updating documentation, comments, READMEs."
+            },
+            "refactoring": {
+              "$ref": "#/definitions/autonomy_level",
+              "description": "Restructuring code without changing functionality."
+            }
+          }
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "description": "Explicit access control. What can agents touch, what is read-only, and what is completely off-limits?",
+      "required": ["boundaries"],
+      "additionalProperties": false,
+      "properties": {
+        "boundaries": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "writable": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Glob patterns for paths agents may modify. If empty, nothing is writable by default.",
+              "examples": [["src/**", "tests/**", "docs/**"]]
+            },
+            "read_only": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Glob patterns for paths agents may read but never modify.",
+              "examples": [["config/**", ".github/**"]]
+            },
+            "forbidden": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Glob patterns for paths agents must never read or modify. Treat as if these paths do not exist.",
+              "examples": [[".env*", "secrets/**", "infrastructure/production/**"]]
+            }
+          }
+        },
+        "sensitive_patterns": {
+          "type": "array",
+          "description": "Patterns that agents should never generate, log, or expose in outputs.",
+          "items": {
+            "type": "object",
+            "required": ["pattern", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "pattern": {
+                "type": "string",
+                "description": "Regex or glob pattern matching sensitive content.",
+                "examples": ["API_KEY_.*", ".*_SECRET", "password"]
+              },
+              "reason": {
+                "type": "string",
+                "maxLength": 100,
+                "description": "Why this is sensitive."
+              }
+            }
+          }
+        }
+      }
+    },
+    "quality_gate": {
+      "type": "object",
+      "description": "The minimum quality bar that must be met before any agent considers a task complete. This is the definition of 'done.'",
+      "required": ["pre_commit"],
+      "additionalProperties": false,
+      "properties": {
+        "pre_commit": {
+          "type": "object",
+          "description": "Checks that must pass before an agent commits or submits work.",
+          "additionalProperties": false,
+          "properties": {
+            "must_pass_tests": {
+              "type": "boolean",
+              "default": true,
+              "description": "All existing tests must pass."
+            },
+            "must_pass_lint": {
+              "type": "boolean",
+              "default": true,
+              "description": "Linting must pass with zero errors."
+            },
+            "must_pass_typecheck": {
+              "type": "boolean",
+              "default": false,
+              "description": "Type checking must pass (for typed languages)."
+            },
+            "must_add_tests": {
+              "type": "boolean",
+              "default": false,
+              "description": "New functionality must include corresponding tests."
+            },
+            "must_update_docs": {
+              "type": "boolean",
+              "default": false,
+              "description": "Changes must include documentation updates where relevant."
+            },
+            "max_files_changed": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum number of files an agent should modify in a single task. Encourages scoped, reviewable changes.",
+              "examples": [20]
+            },
+            "custom_checks": {
+              "type": "array",
+              "description": "Additional commands that must succeed before work is considered complete.",
+              "items": {
+                "type": "object",
+                "required": ["name", "command"],
+                "additionalProperties": false,
+                "properties": {
+                  "name": { "type": "string" },
+                  "command": { "type": "string" },
+                  "description": { "type": "string", "maxLength": 100 }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "conventions": {
+      "type": "array",
+      "description": "Explicit coding and architectural conventions. Each convention is a machine-queryable rule, not prose. An agent can look up: 'What is the convention for X in scope Y?' and get a deterministic answer.",
+      "items": {
+        "type": "object",
+        "required": ["id", "scope", "rule", "enforcement"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "description": "Unique identifier for this convention. Used for lookups and overrides in role files.",
+            "examples": ["component_style", "error_handling", "state_management"]
+          },
+          "scope": {
+            "type": "string",
+            "description": "Glob pattern for which files/directories this convention applies to. Use 'global' for project-wide.",
+            "examples": ["global", "src/frontend/**", "services/api/**"]
+          },
+          "rule": {
+            "type": "string",
+            "description": "The category of this convention.",
+            "examples": ["component_style", "error_handling", "naming", "imports", "state_management", "testing_pattern", "architecture_pattern"]
+          },
+          "value": {
+            "type": "string",
+            "description": "The prescribed value or pattern.",
+            "examples": ["functional", "result_type", "camelCase", "repository_pattern"]
+          },
+          "allowed": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Explicitly allowed options (whitelist).",
+            "examples": [["zustand", "jotai"]]
+          },
+          "forbidden": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Explicitly forbidden options (blacklist).",
+            "examples": [["redux", "mobx"]]
+          },
+          "enforcement": {
+            "$ref": "#/definitions/enforcement_level"
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Brief explanation of why this convention exists. Helps agents make judgment calls in edge cases."
+          }
+        }
+      }
+    },
+    "escalation": {
+      "type": "object",
+      "description": "What should agents do when they encounter situations not covered by policy?",
+      "additionalProperties": false,
+      "properties": {
+        "on_ambiguity": {
+          "type": "string",
+          "enum": ["stop_and_ask", "best_judgment_and_flag", "best_judgment_silent"],
+          "default": "stop_and_ask",
+          "description": "When the policy does not cover a situation: stop_and_ask: Halt and request human guidance. best_judgment_and_flag: Proceed with best judgment but flag the decision for review. best_judgment_silent: Proceed without flagging."
+        },
+        "on_conflict": {
+          "type": "string",
+          "enum": ["stop_and_ask", "principles_win", "convention_wins"],
+          "default": "stop_and_ask",
+          "description": "When two rules or conventions appear to conflict: stop_and_ask: Request human resolution. principles_win: Defer to the project principles by priority order. convention_wins: Follow the more specific convention."
+        },
+        "on_scope_boundary": {
+          "type": "string",
+          "enum": ["stop_and_ask", "flag_and_suggest", "stay_in_lane"],
+          "default": "stay_in_lane",
+          "description": "When a task requires changes outside the agent's assigned scope: stop_and_ask: Request permission. flag_and_suggest: Note what needs to change in the other scope but don't touch it. stay_in_lane: Only work within assigned scope, silently skip out-of-scope work."
+        }
+      }
+    }
+  }
+}

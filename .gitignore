@@ -1,0 +1,51 @@
+# --- Dependencies ---
+node_modules/
+
+# --- Build artifacts ---
+dist/
+build/
+*.tsbuildinfo
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+
+# --- Environments ---
+.env
+*.env
+.venv/
+venv/
+ENV/
+env/
+
+# --- Anaconda / Jupyter ---
+**/anaconda_projects/
+**/.virtual_documents/
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+# --- IDE ---
+.vscode/
+.idea/
+
+# --- System ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+
+# --- Secrets ---
+*.pem
+*.key
+
+# --- Claude Code ---
+.claude/
+
+# --- Aegis user data ---
+.aegis/

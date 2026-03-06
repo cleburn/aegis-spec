@@ -1,0 +1,14 @@
+{
+  "$schema": "https://aegis.dev/schema/role.schema.json",
+  "version": "0.1.0",
+  "role": {
+    "name": "default",
+    "purpose": "Full-scope development across the entire codebase. Used when a single agent handles all work or when a task doesn't fit a specialist role.",
+    "specialization": ["typescript", "python", "react", "fastapi", "prisma"]
+  },
+  "scope": {
+    "primary_paths": ["src/**", "services/**", "tests/**", "docs/**"],
+    "secondary_paths": ["config/**"],
+    "excluded_paths": ["infrastructure/**", ".env*", "secrets/**"]
+  }
+}

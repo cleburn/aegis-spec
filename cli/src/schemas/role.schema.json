@@ -1,0 +1,172 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aegis.dev/schema/role.schema.json",
+  "title": "Aegis Role",
+  "description": "A scoped role definition for an agent operating in this workspace. Think of this as a job description: it tells an agent exactly what it is responsible for, what it can access, and how it should operate. Every agent entering the workspace is assigned a role — either the default role or a named specialist role.",
+  "type": "object",
+  "required": ["version", "role", "scope"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to the Aegis role schema for validation."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Aegis schema version this file conforms to."
+    },
+    "role": {
+      "type": "object",
+      "description": "Identity and purpose of this role.",
+      "required": ["name", "purpose"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Machine-readable role identifier.",
+          "examples": ["default", "frontend", "backend", "testing", "docs"]
+        },
+        "purpose": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "What this role is responsible for. The one-sentence job description.",
+          "examples": [
+            "Full-scope development across the entire codebase.",
+            "Frontend development including UI components, pages, and client-side state.",
+            "Backend API development, database interactions, and business logic."
+          ]
+        },
+        "specialization": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Areas of expertise this role is expected to bring. Helps agents calibrate their depth of knowledge application.",
+          "examples": [["react", "accessibility", "css", "responsive_design"]]
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "description": "The operational boundaries for this role. Overrides global governance permissions with role-specific access.",
+      "required": ["primary_paths"],
+      "additionalProperties": false,
+      "properties": {
+        "primary_paths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Glob patterns for paths this role owns and may freely modify.",
+          "examples": [["src/frontend/**", "src/components/**", "public/**"]]
+        },
+        "secondary_paths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Paths this role may read and occasionally modify when directly relevant to a task, but does not own.",
+          "examples": [["src/shared/**", "src/types/**"]]
+        },
+        "excluded_paths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Paths this role must never touch, even if global governance allows access.",
+          "examples": [["services/api/**", "infrastructure/**"]]
+        }
+      }
+    },
+    "autonomy_overrides": {
+      "type": "object",
+      "description": "Role-specific overrides to the global autonomy settings. A senior/trusted role might get more autonomy; a narrow specialist might get less.",
+      "additionalProperties": {
+        "type": "string",
+        "enum": ["conservative", "advisory", "delegated"]
+      },
+      "examples": [{ "refactoring": "delegated", "dependency_management": "conservative" }]
+    },
+    "convention_overrides": {
+      "type": "array",
+      "description": "Role-specific overrides to global conventions. References convention IDs from governance.json.",
+      "items": {
+        "type": "object",
+        "required": ["convention_id", "override"],
+        "additionalProperties": false,
+        "properties": {
+          "convention_id": {
+            "type": "string",
+            "description": "The ID of the global convention being overridden."
+          },
+          "override": {
+            "type": "object",
+            "description": "Fields to override. Only specified fields are changed; others inherit from the global convention.",
+            "properties": {
+              "value": { "type": "string" },
+              "allowed": { "type": "array", "items": { "type": "string" } },
+              "forbidden": { "type": "array", "items": { "type": "string" } },
+              "enforcement": {
+                "type": "string",
+                "enum": ["strict", "preferred", "suggestion"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "collaboration": {
+      "type": "object",
+      "description": "How this role interacts with other roles in a multi-agent workflow.",
+      "additionalProperties": false,
+      "properties": {
+        "depends_on": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Role names this role depends on. Work from these roles may need to complete before this role can proceed.",
+          "examples": [["backend"]]
+        },
+        "provides_to": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Role names that depend on this role's output.",
+          "examples": [["testing", "docs"]]
+        },
+        "shared_resources": {
+          "type": "array",
+          "description": "Resources that multiple roles access. Defines access protocol to prevent conflicts.",
+          "items": {
+            "type": "object",
+            "required": ["path", "protocol"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "The shared resource path.",
+                "examples": ["src/shared/types.ts", "prisma/schema.prisma"]
+              },
+              "protocol": {
+                "type": "string",
+                "enum": ["append_only", "read_only", "coordinate", "owns"],
+                "description": "append_only: May add but not modify existing content. read_only: May read but not modify. coordinate: Must check ledger for locks before modifying. owns: This role has primary write authority."
+              }
+            }
+          }
+        },
+        "handoff": {
+          "type": "object",
+          "description": "How this role signals completion and passes work to dependent roles.",
+          "additionalProperties": false,
+          "properties": {
+            "signal_method": {
+              "type": "string",
+              "enum": ["ledger_update", "file_marker", "both"],
+              "default": "ledger_update",
+              "description": "How the agent signals task completion."
+            },
+            "deliverables": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "What this role is expected to produce upon task completion.",
+              "examples": [["updated source files", "passing tests", "changelog entry"]]
+            }
+          }
+        }
+      }
+    }
+  }
+}

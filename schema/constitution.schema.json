@@ -1,0 +1,188 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aegis.dev/schema/constitution.schema.json",
+  "title": "Aegis Constitution",
+  "description": "The foundational identity and context of a project. This is the first file any agent reads upon entering the workspace. It answers: What is this place, and what matters here?",
+  "type": "object",
+  "required": ["version", "project", "tech_stack", "principles"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to the Aegis constitution schema for validation."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Aegis schema version this file conforms to.",
+      "examples": ["0.1.0"]
+    },
+    "project": {
+      "type": "object",
+      "description": "Core identity of the project.",
+      "required": ["name", "purpose", "architecture"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The project name.",
+          "examples": ["acme-saas-platform"]
+        },
+        "purpose": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "A concise statement of what this project is and why it exists. One to three sentences maximum. This anchors every decision an agent makes.",
+          "examples": ["A B2B SaaS platform for inventory management, serving mid-size retail companies. Speed and reliability are prioritized over feature breadth."]
+        },
+        "architecture": {
+          "type": "string",
+          "enum": ["monolith", "monorepo", "multi_repo", "microservices", "serverless", "hybrid"],
+          "description": "The high-level architectural pattern of the project."
+        },
+        "module_map": {
+          "type": "array",
+          "description": "Top-level modules or packages in the project, with their purpose and ownership boundaries. This is the organizational chart of the codebase.",
+          "items": {
+            "type": "object",
+            "required": ["path", "purpose"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Relative path from project root.",
+                "examples": ["src/frontend", "services/api", "infrastructure/"]
+              },
+              "purpose": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "What this module does, in one sentence."
+              },
+              "owner": {
+                "type": "string",
+                "description": "The role name (from roles/) that has primary responsibility for this module. If unset, governed by default role.",
+                "examples": ["frontend", "backend", "default"]
+              },
+              "internal_dependencies": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Other module paths this module depends on.",
+                "examples": [["src/shared", "services/auth"]]
+              }
+            }
+          }
+        }
+      }
+    },
+    "tech_stack": {
+      "type": "object",
+      "description": "The technologies in use. Agents use this to calibrate their suggestions and avoid recommending incompatible tools.",
+      "required": ["languages"],
+      "additionalProperties": false,
+      "properties": {
+        "languages": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Programming languages used in this project.",
+          "examples": [["typescript", "python"]]
+        },
+        "frameworks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Major frameworks in use.",
+          "examples": [["next.js", "fastapi", "prisma"]]
+        },
+        "infrastructure": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Infrastructure and deployment tools.",
+          "examples": [["aws", "terraform", "docker", "github-actions"]]
+        },
+        "package_managers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Package managers used across the project.",
+          "examples": [["pnpm", "pip"]]
+        },
+        "key_libraries": {
+          "type": "array",
+          "description": "Important libraries that agents should know about and prefer.",
+          "items": {
+            "type": "object",
+            "required": ["name", "purpose"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "purpose": {
+                "type": "string",
+                "maxLength": 100,
+                "description": "What this library is used for."
+              },
+              "scope": {
+                "type": "string",
+                "description": "Which part of the codebase uses this library.",
+                "examples": ["src/frontend", "global"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "principles": {
+      "type": "array",
+      "description": "The non-negotiable values and priorities of this project. These are the 'why behind the rules.' When an agent faces an ambiguous decision, principles are the tiebreaker.",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["name", "statement"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Short label for this principle.",
+            "examples": ["reliability_first", "simplicity", "test_everything"]
+          },
+          "statement": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "The principle expressed as a clear directive.",
+            "examples": ["Reliability is more important than speed of delivery. Never ship something that is not thoroughly tested.", "Prefer the simplest solution that meets the requirement. Avoid premature abstraction."]
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Relative priority. 1 is highest. When principles conflict, lower number wins."
+          }
+        }
+      }
+    },
+    "build_commands": {
+      "type": "object",
+      "description": "Essential commands agents need to build, test, and validate the project.",
+      "additionalProperties": false,
+      "properties": {
+        "install": { "type": "string", "examples": ["pnpm install"] },
+        "build": { "type": "string", "examples": ["pnpm build"] },
+        "test": { "type": "string", "examples": ["pnpm test"] },
+        "lint": { "type": "string", "examples": ["pnpm lint"] },
+        "typecheck": { "type": "string", "examples": ["pnpm typecheck"] },
+        "dev": { "type": "string", "examples": ["pnpm dev"] },
+        "custom": {
+          "type": "array",
+          "description": "Any additional commands agents should know about.",
+          "items": {
+            "type": "object",
+            "required": ["name", "command", "purpose"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "command": { "type": "string" },
+              "purpose": { "type": "string", "maxLength": 100 }
+            }
+          }
+        }
+      }
+    }
+  }
+}
