@@ -29,7 +29,9 @@ import {
 const AEGIS = chalk.hex("#5B8DEF");
 const YOU = chalk.hex("#A8D8A8");
 const DIM = chalk.dim;
-const BOLT = chalk.hex("#FFD700");
+const ACCENT = chalk.hex("#5B8DEF");
+const CHECK = chalk.hex("#A8D8A8");
+const PROGRESS = chalk.hex("#FFD700");
 
 export class TerminalUI {
   private rl: readline.Interface | null = null;
@@ -171,7 +173,7 @@ export class TerminalUI {
       this.currentFrameIndex =
         (this.currentFrameIndex + 1) % this.currentAnimation!.length;
       this.redrawFrame();
-    }, 300);
+    }, 600);
   }
 
   /**
@@ -309,11 +311,18 @@ function colorizeLogo(text: string): string {
 
 /**
  * Add color to thinking animation frames.
+ * Shield outline gets aegis blue, diamonds/checkmarks get distinct colors,
+ * file tree and labels stay dim, "ready" gets accent color.
  */
 function colorizeThinking(text: string): string {
   return text
-    .replace(/\u26A1/g, BOLT("\u26A1"))
-    .replace(/\uD83E\uDD14/g, "\uD83E\uDD14")
-    .replace(/\uD83D\uDC40/g, "\uD83D\uDC40")
-    .replace(/[~]/g, DIM("~"));
+    .replace(/\u25C7/g, DIM("\u25C7"))                    // empty diamond — dim
+    .replace(/\u25C6/g, PROGRESS("\u25C6"))               // filled diamond — gold (in progress)
+    .replace(/\u2713/g, CHECK("\u2713"))                   // checkmark — green
+    .replace(/ready/g, CHECK("ready"))                     // "ready" label — green
+    .replace(/thinking\.\.\./g, DIM("thinking..."))        // thinking label — dim
+    .replace(/scanning repo\.\.\./g, DIM("scanning repo...")) // scanning label — dim
+    .replace(/\.agentpolicy\//g, ACCENT(".agentpolicy/"))  // directory name — blue
+    .replace(/\u25B3/g, ACCENT("\u25B3"))                  // triangle top — blue
+    .replace(/V/g, ACCENT("V"));                           // V bottom — blue
 }

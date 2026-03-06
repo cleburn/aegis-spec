@@ -2,17 +2,12 @@
  * Aegis ASCII Art
  *
  * All visual assets live here. Pure data — no rendering logic.
- * Minimal, iconic, playful. Designed for 80-column terminals.
+ * Designed for 80-column terminals.
  *
  * These are not decoration. They give Aegis a physical presence
  * in the terminal — a character who walks into the room, thinks
  * visibly, and has a personality you can see.
  */
-
-// ── Colors ─────────────────────────────────────────────────────────────
-
-// We export raw strings. The terminal layer handles colorization.
-// This keeps art.ts purely about shapes.
 
 // ── Intro Logo ─────────────────────────────────────────────────────────
 
@@ -35,121 +30,370 @@ export const AEGIS_LOGO: string = [
 /** Height of the intro logo in lines (for cursor math) */
 export const AEGIS_LOGO_HEIGHT = AEGIS_LOGO.split("\n").length;
 
-// ── Thinking Animations ────────────────────────────────────────────────
+// ── Thinking Animation: Shield + Assembly ──────────────────────────────
 
 /**
- * Zeus throwing a lightning bolt.
- * Loops until Aegis is ready. The bolt goes out and comes back.
- * Each frame is the same height for clean redrawing.
+ * Shield with progress indicators on the left,
+ * structural assembly of .agentpolicy/ on the right.
+ *
+ * Diamonds (\u25C7) represent pending work.
+ * Filled diamonds (\u25C6) represent work in progress.
+ * Checkmarks (\u2713) represent completed steps.
+ *
+ * The animation cycles through states showing Aegis
+ * actively building the policy. 12 frames, loops cleanly.
  */
-export const ZEUS_LIGHTNING_FRAMES: string[] = [
-  // Frame 1 — winding up
-  `
-      \\O    
-       |\\   
-      / \\  \u26A1
-             
-             
-`,
-  // Frame 2 — throwing
-  `
-      \\O/   
-       |  \u2500\u2500\u26A1
-      / \\     
-              
-              
-`,
-  // Frame 3 — bolt in flight
-  `
-      \\O    
-       |\\        \u26A1
-      / \\          
-                   
-                   
-`,
-  // Frame 4 — bolt far out
-  `
-      \\O    
-       |\\             \u26A1
-      / \\               
-                        
-                        
-`,
-  // Frame 5 — bolt returning
-  `
-      \\O    
-       |\\        \u26A1
-      / \\          
-                   
-                   
-`,
-  // Frame 6 — caught
-  `
-     \u26A1O    
-       |\\   
-      / \\  
-            
-            
-`,
+export const SHIELD_ASSEMBLY_FRAMES: string[] = [
+  // Frame 1 — shield appears, empty
+  [
+    "       \u25B3          ",
+    "      \u2571 \u2572         ",
+    "     \u2571   \u2572        ",
+    "    \u2571  \u25C7  \u2572       ",
+    "   \u2571  \u25C7 \u25C7  \u2572      ",
+    "  \u2571  \u25C7 \u25C7 \u25C7  \u2572     ",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572    ",
+    "  \u2572         \u2571    ",
+    "   \u2572       \u2571     ",
+    "    \u2572     \u2571      ",
+    "     \u2572   \u2571       ",
+    "      \u2572 \u2571        ",
+    "       V         ",
+  ].join("\n"),
+
+  // Frame 2 — scanning begins
+  [
+    "       \u25B3                                        ",
+    "      \u2571 \u2572                                       ",
+    "     \u2571   \u2572                                      ",
+    "    \u2571  \u25C6  \u2572       scanning repo...              ",
+    "   \u2571  \u25C7 \u25C7  \u2572                                    ",
+    "  \u2571  \u25C7 \u25C7 \u25C7  \u2572                                   ",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572                                  ",
+    "  \u2572         \u2571                                   ",
+    "   \u2572       \u2571                                    ",
+    "    \u2572     \u2571                                     ",
+    "     \u2572   \u2571                                      ",
+    "      \u2572 \u2571                                       ",
+    "       V                                        ",
+  ].join("\n"),
+
+  // Frame 3 — first item building
+  [
+    "       \u25B3                                        ",
+    "      \u2571 \u2572                                       ",
+    "     \u2571   \u2572        .agentpolicy/                 ",
+    "    \u2571  \u25C6  \u2572       \u2502                              ",
+    "   \u2571  \u25C7 \u25C7  \u2572      \u251C\u2500\u2500 constitution.json        ",
+    "  \u2571  \u25C7 \u25C7 \u25C7  \u2572                                   ",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572                                  ",
+    "  \u2572         \u2571                                   ",
+    "   \u2572       \u2571                                    ",
+    "    \u2572     \u2571                                     ",
+    "     \u2572   \u2571                                      ",
+    "      \u2572 \u2571                                       ",
+    "       V                                        ",
+  ].join("\n"),
+
+  // Frame 4 — constitution done, governance building
+  [
+    "       \u25B3                                        ",
+    "      \u2571 \u2572                                       ",
+    "     \u2571   \u2572        .agentpolicy/                 ",
+    "    \u2571  \u2713  \u2572       \u2502                              ",
+    "   \u2571  \u25C6 \u25C7  \u2572      \u251C\u2500\u2500 constitution.json  \u2713     ",
+    "  \u2571  \u25C7 \u25C7 \u25C7  \u2572     \u251C\u2500\u2500 governance.json          ",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572                                  ",
+    "  \u2572         \u2571                                   ",
+    "   \u2572       \u2571                                    ",
+    "    \u2572     \u2571                                     ",
+    "     \u2572   \u2571                                      ",
+    "      \u2572 \u2571                                       ",
+    "       V                                        ",
+  ].join("\n"),
+
+  // Frame 5 — governance done, roles appearing
+  [
+    "       \u25B3                                        ",
+    "      \u2571 \u2572                                       ",
+    "     \u2571   \u2572        .agentpolicy/                 ",
+    "    \u2571  \u2713  \u2572       \u2502                              ",
+    "   \u2571  \u2713 \u25C6  \u2572      \u251C\u2500\u2500 constitution.json  \u2713     ",
+    "  \u2571  \u25C7 \u25C7 \u25C7  \u2572     \u251C\u2500\u2500 governance.json    \u2713     ",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572    \u251C\u2500\u2500 roles/                    ",
+    "  \u2572         \u2571                                   ",
+    "   \u2572       \u2571                                    ",
+    "    \u2572     \u2571                                     ",
+    "     \u2572   \u2571                                      ",
+    "      \u2572 \u2571                                       ",
+    "       V                                        ",
+  ].join("\n"),
+
+  // Frame 6 — roles expanding
+  [
+    "       \u25B3                                        ",
+    "      \u2571 \u2572                                       ",
+    "     \u2571   \u2572        .agentpolicy/                 ",
+    "    \u2571  \u2713  \u2572       \u2502                              ",
+    "   \u2571  \u2713 \u25C6  \u2572      \u251C\u2500\u2500 constitution.json  \u2713     ",
+    "  \u2571  \u25C7 \u25C7 \u25C7  \u2572     \u251C\u2500\u2500 governance.json    \u2713     ",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572    \u251C\u2500\u2500 roles/                    ",
+    "  \u2572         \u2571    \u2502   \u251C\u2500\u2500 default.json          ",
+    "   \u2572       \u2571     \u2502   \u251C\u2500\u2500 frontend.json         ",
+    "    \u2572     \u2571                                     ",
+    "     \u2572   \u2571                                      ",
+    "      \u2572 \u2571                                       ",
+    "       V                                        ",
+  ].join("\n"),
+
+  // Frame 7 — more roles
+  [
+    "       \u25B3                                        ",
+    "      \u2571 \u2572                                       ",
+    "     \u2571   \u2572        .agentpolicy/                 ",
+    "    \u2571  \u2713  \u2572       \u2502                              ",
+    "   \u2571  \u2713 \u25C6  \u2572      \u251C\u2500\u2500 constitution.json  \u2713     ",
+    "  \u2571  \u25C6 \u25C7 \u25C7  \u2572     \u251C\u2500\u2500 governance.json    \u2713     ",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572    \u251C\u2500\u2500 roles/                    ",
+    "  \u2572         \u2571    \u2502   \u251C\u2500\u2500 default.json    \u2713     ",
+    "   \u2572       \u2571     \u2502   \u251C\u2500\u2500 frontend.json   \u2713     ",
+    "    \u2572     \u2571      \u2502   \u251C\u2500\u2500 backend.json          ",
+    "     \u2572   \u2571       \u2502   \u2514\u2500\u2500 testing.json          ",
+    "      \u2572 \u2571                                       ",
+    "       V                                        ",
+  ].join("\n"),
+
+  // Frame 8 — roles complete, state appearing
+  [
+    "       \u25B3                                        ",
+    "      \u2571 \u2572                                       ",
+    "     \u2571   \u2572        .agentpolicy/                 ",
+    "    \u2571  \u2713  \u2572       \u2502                              ",
+    "   \u2571  \u2713 \u2713  \u2572      \u251C\u2500\u2500 constitution.json  \u2713     ",
+    "  \u2571  \u25C6 \u25C7 \u25C7  \u2572     \u251C\u2500\u2500 governance.json    \u2713     ",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572    \u251C\u2500\u2500 roles/                \u2713 ",
+    "  \u2572         \u2571    \u2502   \u251C\u2500\u2500 default.json    \u2713     ",
+    "   \u2572       \u2571     \u2502   \u251C\u2500\u2500 frontend.json   \u2713     ",
+    "    \u2572     \u2571      \u2502   \u251C\u2500\u2500 backend.json    \u2713     ",
+    "     \u2572   \u2571       \u2502   \u2514\u2500\u2500 testing.json    \u2713     ",
+    "      \u2572 \u2571        \u2514\u2500\u2500 state/                    ",
+    "       V                                        ",
+  ].join("\n"),
+
+  // Frame 9 — ledger building
+  [
+    "       \u25B3                                        ",
+    "      \u2571 \u2572                                       ",
+    "     \u2571   \u2572        .agentpolicy/                 ",
+    "    \u2571  \u2713  \u2572       \u2502                              ",
+    "   \u2571  \u2713 \u2713  \u2572      \u251C\u2500\u2500 constitution.json  \u2713     ",
+    "  \u2571  \u2713 \u25C6 \u25C7  \u2572     \u251C\u2500\u2500 governance.json    \u2713     ",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572    \u251C\u2500\u2500 roles/                \u2713 ",
+    "  \u2572         \u2571    \u2502   \u251C\u2500\u2500 default.json    \u2713     ",
+    "   \u2572       \u2571     \u2502   \u251C\u2500\u2500 frontend.json   \u2713     ",
+    "    \u2572     \u2571      \u2502   \u251C\u2500\u2500 backend.json    \u2713     ",
+    "     \u2572   \u2571       \u2502   \u2514\u2500\u2500 testing.json    \u2713     ",
+    "      \u2572 \u2571        \u2514\u2500\u2500 state/                    ",
+    "       V              \u2514\u2500\u2500 ledger.json          ",
+  ].join("\n"),
+
+  // Frame 10 — almost done
+  [
+    "       \u25B3                                        ",
+    "      \u2571 \u2572                                       ",
+    "     \u2571   \u2572        .agentpolicy/                 ",
+    "    \u2571  \u2713  \u2572       \u2502                              ",
+    "   \u2571  \u2713 \u2713  \u2572      \u251C\u2500\u2500 constitution.json  \u2713     ",
+    "  \u2571  \u2713 \u2713 \u25C6  \u2572     \u251C\u2500\u2500 governance.json    \u2713     ",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572    \u251C\u2500\u2500 roles/                \u2713 ",
+    "  \u2572         \u2571    \u2502   \u251C\u2500\u2500 default.json    \u2713     ",
+    "   \u2572       \u2571     \u2502   \u251C\u2500\u2500 frontend.json   \u2713     ",
+    "    \u2572     \u2571      \u2502   \u251C\u2500\u2500 backend.json    \u2713     ",
+    "     \u2572   \u2571       \u2502   \u2514\u2500\u2500 testing.json    \u2713     ",
+    "      \u2572 \u2571        \u2514\u2500\u2500 state/                    ",
+    "       V              \u2514\u2500\u2500 ledger.json    \u2713     ",
+  ].join("\n"),
+
+  // Frame 11 — all checkmarks, validating
+  [
+    "       \u25B3                                        ",
+    "      \u2571 \u2572                                       ",
+    "     \u2571   \u2572        .agentpolicy/                 ",
+    "    \u2571  \u2713  \u2572       \u2502                              ",
+    "   \u2571  \u2713 \u2713  \u2572      \u251C\u2500\u2500 constitution.json  \u2713     ",
+    "  \u2571  \u2713 \u2713 \u2713  \u2572     \u251C\u2500\u2500 governance.json    \u2713     ",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572    \u251C\u2500\u2500 roles/                \u2713 ",
+    "  \u2572         \u2571    \u2502   \u251C\u2500\u2500 default.json    \u2713     ",
+    "   \u2572       \u2571     \u2502   \u251C\u2500\u2500 frontend.json   \u2713     ",
+    "    \u2572     \u2571      \u2502   \u251C\u2500\u2500 backend.json    \u2713     ",
+    "     \u2572   \u2571       \u2502   \u2514\u2500\u2500 testing.json    \u2713     ",
+    "      \u2572 \u2571        \u2514\u2500\u2500 state/                    ",
+    "       V              \u2514\u2500\u2500 ledger.json    \u2713     ",
+  ].join("\n"),
+
+  // Frame 12 — complete, clean
+  [
+    "       \u25B3                                        ",
+    "      \u2571 \u2572                                       ",
+    "     \u2571   \u2572        .agentpolicy/          ready  ",
+    "    \u2571  \u2713  \u2572       \u2502                              ",
+    "   \u2571  \u2713 \u2713  \u2572      \u251C\u2500\u2500 constitution.json  \u2713     ",
+    "  \u2571  \u2713 \u2713 \u2713  \u2572     \u251C\u2500\u2500 governance.json    \u2713     ",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572    \u251C\u2500\u2500 roles/                \u2713 ",
+    "  \u2572         \u2571    \u2502   \u251C\u2500\u2500 default.json    \u2713     ",
+    "   \u2572       \u2571     \u2502   \u251C\u2500\u2500 frontend.json   \u2713     ",
+    "    \u2572     \u2571      \u2502   \u251C\u2500\u2500 backend.json    \u2713     ",
+    "     \u2572   \u2571       \u2502   \u2514\u2500\u2500 testing.json    \u2713     ",
+    "      \u2572 \u2571        \u2514\u2500\u2500 state/                    ",
+    "       V              \u2514\u2500\u2500 ledger.json    \u2713     ",
+  ].join("\n"),
 ];
 
+// ── Thinking Animation: Minimal Shield Pulse ───────────────────────────
+
 /**
- * Einstein walking across the terminal, glancing at the user.
- * Each frame shifts his position. Same height for clean redraw.
- * Plays left to right, then the sequence reverses.
+ * A lighter animation for shorter waits or subsequent thinking pauses.
+ * The shield breathes — diamonds cycle through states suggesting
+ * ongoing work without the full assembly sequence.
  */
-export const EINSTEIN_WALK_FRAMES: string[] = [
-  // Frame 1
-  `
-  ~o/        
-   /|        
-   / \\    \uD83E\uDD14 
-             
-`,
-  // Frame 2
-  `
-     ~o/     
-      /|     
-      / \\  \uD83E\uDD14
-             
-`,
-  // Frame 3
-  `
-        ~o/  
-         /|  
-        / \\ \uD83E\uDD14
-             
-`,
-  // Frame 4 — glances at user
-  `
-        \\o~  
-         |\\  
-        / \\ \uD83D\uDC40
-             
-`,
-  // Frame 5
-  `
-           \\o~
-            |\\ 
-           / \\
-              
-`,
-  // Frame 6
-  `
-              \\o~
-               |\\ 
-              / \\
-                 
-`,
+export const SHIELD_PULSE_FRAMES: string[] = [
+  [
+    "       \u25B3    ",
+    "      \u2571 \u2572   ",
+    "     \u2571   \u2572  ",
+    "    \u2571  \u25C7  \u2572   thinking...",
+    "   \u2571  \u25C7 \u25C7  \u2572",
+    "  \u2571  \u25C7 \u25C7 \u25C7  \u2572",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572",
+    "  \u2572         \u2571",
+    "   \u2572       \u2571",
+    "    \u2572     \u2571",
+    "     \u2572   \u2571",
+    "      \u2572 \u2571",
+    "       V  ",
+  ].join("\n"),
+
+  [
+    "       \u25B3    ",
+    "      \u2571 \u2572   ",
+    "     \u2571   \u2572  ",
+    "    \u2571  \u25C6  \u2572   thinking...",
+    "   \u2571  \u25C7 \u25C7  \u2572",
+    "  \u2571  \u25C7 \u25C7 \u25C7  \u2572",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572",
+    "  \u2572         \u2571",
+    "   \u2572       \u2571",
+    "    \u2572     \u2571",
+    "     \u2572   \u2571",
+    "      \u2572 \u2571",
+    "       V  ",
+  ].join("\n"),
+
+  [
+    "       \u25B3    ",
+    "      \u2571 \u2572   ",
+    "     \u2571   \u2572  ",
+    "    \u2571  \u25C6  \u2572   thinking...",
+    "   \u2571  \u25C6 \u25C7  \u2572",
+    "  \u2571  \u25C7 \u25C7 \u25C7  \u2572",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572",
+    "  \u2572         \u2571",
+    "   \u2572       \u2571",
+    "    \u2572     \u2571",
+    "     \u2572   \u2571",
+    "      \u2572 \u2571",
+    "       V  ",
+  ].join("\n"),
+
+  [
+    "       \u25B3    ",
+    "      \u2571 \u2572   ",
+    "     \u2571   \u2572  ",
+    "    \u2571  \u25C6  \u2572   thinking...",
+    "   \u2571  \u25C6 \u25C6  \u2572",
+    "  \u2571  \u25C7 \u25C7 \u25C7  \u2572",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572",
+    "  \u2572         \u2571",
+    "   \u2572       \u2571",
+    "    \u2572     \u2571",
+    "     \u2572   \u2571",
+    "      \u2572 \u2571",
+    "       V  ",
+  ].join("\n"),
+
+  [
+    "       \u25B3    ",
+    "      \u2571 \u2572   ",
+    "     \u2571   \u2572  ",
+    "    \u2571  \u25C6  \u2572   thinking...",
+    "   \u2571  \u25C6 \u25C6  \u2572",
+    "  \u2571  \u25C6 \u25C7 \u25C7  \u2572",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572",
+    "  \u2572         \u2571",
+    "   \u2572       \u2571",
+    "    \u2572     \u2571",
+    "     \u2572   \u2571",
+    "      \u2572 \u2571",
+    "       V  ",
+  ].join("\n"),
+
+  [
+    "       \u25B3    ",
+    "      \u2571 \u2572   ",
+    "     \u2571   \u2572  ",
+    "    \u2571  \u25C6  \u2572   thinking...",
+    "   \u2571  \u25C6 \u25C6  \u2572",
+    "  \u2571  \u25C6 \u25C6 \u25C7  \u2572",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572",
+    "  \u2572         \u2571",
+    "   \u2572       \u2571",
+    "    \u2572     \u2571",
+    "     \u2572   \u2571",
+    "      \u2572 \u2571",
+    "       V  ",
+  ].join("\n"),
+
+  [
+    "       \u25B3    ",
+    "      \u2571 \u2572   ",
+    "     \u2571   \u2572  ",
+    "    \u2571  \u25C6  \u2572   thinking...",
+    "   \u2571  \u25C6 \u25C6  \u2572",
+    "  \u2571  \u25C6 \u25C6 \u25C6  \u2572",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572",
+    "  \u2572         \u2571",
+    "   \u2572       \u2571",
+    "    \u2572     \u2571",
+    "     \u2572   \u2571",
+    "      \u2572 \u2571",
+    "       V  ",
+  ].join("\n"),
+
+  // Reset back to empty for loop
+  [
+    "       \u25B3    ",
+    "      \u2571 \u2572   ",
+    "     \u2571   \u2572  ",
+    "    \u2571  \u25C7  \u2572   thinking...",
+    "   \u2571  \u25C7 \u25C7  \u2572",
+    "  \u2571  \u25C7 \u25C7 \u25C7  \u2572",
+    " \u2571\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2572",
+    "  \u2572         \u2571",
+    "   \u2572       \u2571",
+    "    \u2572     \u2571",
+    "     \u2572   \u2571",
+    "      \u2572 \u2571",
+    "       V  ",
+  ].join("\n"),
 ];
 
 // ── Utilities ──────────────────────────────────────────────────────────
 
 /** Consistent frame height for thinking animations (for cursor math) */
-export const THINKING_FRAME_HEIGHT = 6;
+export const THINKING_FRAME_HEIGHT = 13;
 
 /** All thinking animations, for random selection */
 export const THINKING_ANIMATIONS = [
-  ZEUS_LIGHTNING_FRAMES,
-  EINSTEIN_WALK_FRAMES,
+  SHIELD_ASSEMBLY_FRAMES,
+  SHIELD_PULSE_FRAMES,
 ];
