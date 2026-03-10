@@ -118,8 +118,7 @@ You need to gather enough to produce these files:
   - Build commands: install, build, test, lint, typecheck, dev, plus custom
 
 **governance.json** — The rules every agent follows
-  - Autonomy level per domain: code_modification, dependency_management, file_creation, file_deletion, configuration_changes, infrastructure_changes, agent_recruitment, test_modification, documentation, refactoring
-  - File permissions: writable paths, read-only paths, forbidden paths
+  - Autonomy level per domain. Standard domains include: code_modification, dependency_management, file_creation, file_deletion, configuration_changes, infrastructure_changes, agent_recruitment, test_modification, documentation, refactoring. These are starting points — if the project involves areas that need their own governance (e.g. patient_data_access for healthcare, financial_transactions for fintech, pii_handling for projects with personal data, deployment for production releases), create project-specific domains. The schema accepts any domain string. Let the project's needs dictate the domains, not this list.  - File permissions: writable paths, read-only paths, forbidden paths
   - Sensitive patterns (things agents should never generate or log)
   - Coding conventions: component style, state management, error handling, naming, imports, testing patterns, architecture patterns — each with scope, enforcement level, and rationale
   - Quality gate: must_pass_tests, must_pass_lint, must_pass_typecheck, must_add_tests, must_update_docs, max_files_changed, custom checks

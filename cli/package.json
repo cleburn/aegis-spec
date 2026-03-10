@@ -1,6 +1,6 @@
 {
   "name": "aegis-cli",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": ".editorconfig for AI agents. Structured governance for any AI agent working in your codebase.",
   "type": "module",
   "main": "dist/src/index.js",
