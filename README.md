@@ -82,6 +82,8 @@ All policy files include a `$schema` reference and a `version` field. Tools can 
 
 The [`examples/`](./examples) directory contains a complete `.agentpolicy/` directory for a fictional project (Relay CRM) demonstrating all four file types with realistic content.
 
+For a real-world stress test, see [ClearHealth](https://github.com/cleburn/clearhealth) — a HIPAA-compliant healthcare platform built entirely by a 5-agent AI swarm governed by Aegis. 65+ files deployed in 27 minutes, zero governance violations, PII scan passed on GitHub Actions.
+
 ## Agent-Agnostic
 
 Aegis doesn't compete with Claude Code, Cursor, Codex, Gemini, or any other agent. It serves all of them. The `.agentpolicy/` format is an open spec — any tool can read it, and every tool benefits from a standardized way to understand its operating rules in a given repo.
