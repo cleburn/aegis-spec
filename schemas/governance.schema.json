@@ -276,6 +276,71 @@
           "description": "When a task requires changes outside the agent's assigned scope: stop_and_ask: Request permission. flag_and_suggest: Note what needs to change in the other scope but don't touch it. stay_in_lane: Only work within assigned scope, silently skip out-of-scope work."
         }
       }
+    },
+    "override_protocol": {
+      "type": "object",
+      "description": "What happens when a human instructs an agent to take an action that violates a governance policy. Agents cannot refuse a direct human instruction, but they can — and must — ensure the override is informed, documented, and auditable. This is the governance equivalent of a signed waiver: the human has the authority to override, but the override goes on record.",
+      "additionalProperties": false,
+      "properties": {
+        "behavior": {
+          "type": "string",
+          "enum": ["block_and_log", "warn_confirm_and_log", "log_only"],
+          "default": "warn_confirm_and_log",
+          "description": "block_and_log: Agent refuses the action entirely, logs the attempt, and directs the human to modify the policy first. Only enforceable with a runtime layer. warn_confirm_and_log: Agent identifies the specific policy being violated, presents it to the human, requires explicit confirmation to proceed, and logs the override. This is the recommended default. log_only: Agent complies with the instruction but silently logs the policy violation. Least protective but still auditable."
+        },
+        "log_path": {
+          "type": "string",
+          "default": ".agentpolicy/state/overrides.jsonl",
+          "description": "Path to the append-only override log file relative to project root. Each entry is a single JSON line. This file must never be modified or truncated — append only."
+        },
+        "log_entry_schema": {
+          "type": "object",
+          "description": "The structure of each override log entry. Defines what gets recorded when a policy is overridden.",
+          "additionalProperties": false,
+          "properties": {
+            "timestamp": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the override occurred."
+            },
+            "policy_violated": {
+              "type": "string",
+              "description": "The specific policy ID, principle name, or governance rule that was violated.",
+              "examples": ["principle:compliance-supremacy", "convention:no_hardcoded_secrets", "permission:forbidden_path"]
+            },
+            "policy_text": {
+              "type": "string",
+              "maxLength": 500,
+              "description": "The full text or summary of the policy that was violated, so the log is self-contained and readable without cross-referencing."
+            },
+            "action_requested": {
+              "type": "string",
+              "maxLength": 500,
+              "description": "What the human instructed the agent to do."
+            },
+            "human_confirmed": {
+              "type": "boolean",
+              "description": "Whether the human explicitly confirmed the override after being informed of the policy violation."
+            },
+            "agent_role": {
+              "type": "string",
+              "description": "Which agent role was operating when the override occurred.",
+              "examples": ["default", "payments", "compliance"]
+            },
+            "rationale": {
+              "type": "string",
+              "maxLength": 500,
+              "description": "Optional rationale provided by the human for why the override is necessary."
+            }
+          }
+        },
+        "immutable_policies": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Policy IDs that cannot be overridden even with human confirmation. These require the human to modify the governance files directly through Aegis rather than bypassing them in conversation. For projects with runtime enforcement, these are hard blocks. Without runtime enforcement, agents should refuse and explain that the policy must be changed through 'aegis init' rather than overridden in conversation.",
+          "examples": [["principle:compliance-supremacy", "principle:audit-trail-completeness"]]
+        }
+      }
     }
   }
 }
