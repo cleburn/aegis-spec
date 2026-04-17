@@ -131,7 +131,6 @@
               },
               "reason": {
                 "type": "string",
-                "maxLength": 100,
                 "description": "Why this is sensitive."
               }
             },
@@ -190,7 +189,7 @@
                 "properties": {
                   "name": { "type": "string" },
                   "command": { "type": "string" },
-                  "description": { "type": "string", "maxLength": 100 }
+                  "description": { "type": "string" }
                 },
                 "additionalProperties": true
               }
@@ -210,7 +209,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^[a-z][a-z0-9_]*$",
+            "pattern": "^[a-z][a-z0-9_-]*$",
             "description": "Unique identifier for this convention. Used for lookups and overrides in role files.",
             "examples": ["component_style", "error_handling", "state_management"]
           },
@@ -246,7 +245,6 @@
           },
           "rationale": {
             "type": "string",
-            "maxLength": 200,
             "description": "Brief explanation of why this convention exists. Helps agents make judgment calls in edge cases."
           }
         },
@@ -309,12 +307,10 @@
             },
             "policy_text": {
               "type": "string",
-              "maxLength": 500,
               "description": "The full text or summary of the policy that was violated, so the log is self-contained and readable without cross-referencing."
             },
             "action_requested": {
               "type": "string",
-              "maxLength": 500,
               "description": "What the human instructed the agent to do."
             },
             "human_confirmed": {
@@ -328,7 +324,6 @@
             },
             "rationale": {
               "type": "string",
-              "maxLength": 500,
               "description": "Optional rationale provided by the human for why the override is necessary."
             }
           },
