@@ -28,9 +28,9 @@
             "description": "The message content. For 'system' role messages, this is a JSON string containing structured session metadata."
           }
         },
-        "additionalProperties": false
+        "additionalProperties": true
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }
