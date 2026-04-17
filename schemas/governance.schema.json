@@ -291,43 +291,10 @@
           "default": ".agentpolicy/state/overrides.jsonl",
           "description": "Path to the append-only override log file relative to project root. Each entry is a single JSON line. This file must never be modified or truncated — append only."
         },
-        "log_entry_schema": {
-          "type": "object",
-          "description": "The structure of each override log entry. Defines what gets recorded when a policy is overridden.",
-          "properties": {
-            "timestamp": {
-              "type": "string",
-              "format": "date-time",
-              "description": "When the override occurred."
-            },
-            "policy_violated": {
-              "type": "string",
-              "description": "The specific policy ID, principle name, or governance rule that was violated.",
-              "examples": ["principle:compliance-supremacy", "convention:no_hardcoded_secrets", "permission:forbidden_path"]
-            },
-            "policy_text": {
-              "type": "string",
-              "description": "The full text or summary of the policy that was violated, so the log is self-contained and readable without cross-referencing."
-            },
-            "action_requested": {
-              "type": "string",
-              "description": "What the human instructed the agent to do."
-            },
-            "human_confirmed": {
-              "type": "boolean",
-              "description": "Whether the human explicitly confirmed the override after being informed of the policy violation."
-            },
-            "agent_role": {
-              "type": "string",
-              "description": "Which agent role was operating when the override occurred.",
-              "examples": ["default", "payments", "compliance"]
-            },
-            "rationale": {
-              "type": "string",
-              "description": "Optional rationale provided by the human for why the override is necessary."
-            }
-          },
-          "additionalProperties": true
+        "log_entry_schema_ref": {
+          "type": "string",
+          "default": "https://aegis.dev/schema/overrides.schema.json",
+          "description": "URI of the schema that defines the shape of each line in the override log. The canonical Aegis override entry schema is published as overrides.schema.json. Implementations may reference an alternate schema URI as long as it is a superset of the canonical contract."
         },
         "immutable_policies": {
           "type": "array",

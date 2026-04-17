@@ -124,6 +124,7 @@ The JSON schemas define the `.agentpolicy/` format:
 | [`governance.schema.json`](schemas/governance.schema.json) | Autonomy, permissions, conventions, quality gates, escalation |
 | [`role.schema.json`](schemas/role.schema.json) | Scoped role definitions with collaboration protocols |
 | [`ledger.schema.json`](schemas/ledger.schema.json) | Shared operational state and task tracking |
+| [`overrides.schema.json`](schemas/overrides.schema.json) | Per-line shape of the append-only override log (`state/overrides.jsonl`) |
 | [`session.schema.json`](schemas/session.schema.json) | Discovery session transcripts |
 
 All policy files include a `$schema` reference and a `version` field. Tools can validate policy files against these schemas to ensure structural correctness.
