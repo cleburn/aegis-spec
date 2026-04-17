@@ -93,7 +93,6 @@
           },
           "summary": {
             "type": "string",
-            "maxLength": 300,
             "description": "What this task is doing, in one to two sentences."
           },
           "assigned_role": {
@@ -123,7 +122,6 @@
           },
           "blocked_reason": {
             "type": "string",
-            "maxLength": 300,
             "description": "If status is 'blocked', explain why."
           },
           "failure_log": {
@@ -132,12 +130,10 @@
             "properties": {
               "approach": {
                 "type": "string",
-                "maxLength": 500,
                 "description": "What was attempted."
               },
               "error": {
                 "type": "string",
-                "maxLength": 500,
                 "description": "What went wrong."
               },
               "attempted_at": {
@@ -157,7 +153,6 @@
             "properties": {
               "summary": {
                 "type": "string",
-                "maxLength": 300,
                 "description": "What was accomplished."
               },
               "files_created": {
@@ -197,8 +192,7 @@
                   "examples": ["frontend", "aegis", "human"]
                 },
                 "content": {
-                  "type": "string",
-                  "maxLength": 500
+                  "type": "string"
                 }
               },
               "additionalProperties": true
@@ -230,7 +224,6 @@
           },
           "reason": {
             "type": "string",
-            "maxLength": 200,
             "description": "Why this lock was acquired."
           },
           "expires_at": {
