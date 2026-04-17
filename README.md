@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/license-Apache%202.0-blue?style=flat" alt="License: Apache 2.0" />
-  <img src="https://img.shields.io/badge/spec-v0.2.0-green?style=flat" alt="Spec Version: v0.2.0" />
+  <img src="https://img.shields.io/badge/spec-v0.3.0-green?style=flat" alt="Spec Version: v0.3.0" />
 </p>
 
 <p align="center">
