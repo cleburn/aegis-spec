@@ -28,7 +28,6 @@
         },
         "purpose": {
           "type": "string",
-          "maxLength": 500,
           "description": "A concise statement of what this project is and why it exists. One to three sentences maximum. This anchors every decision an agent makes.",
           "examples": ["A B2B SaaS platform for inventory management, serving mid-size retail companies. Speed and reliability are prioritized over feature breadth."]
         },
@@ -51,7 +50,6 @@
               },
               "purpose": {
                 "type": "string",
-                "maxLength": 200,
                 "description": "What this module does, in one sentence."
               },
               "owner": {
@@ -82,12 +80,10 @@
               },
               "purpose": {
                 "type": "string",
-                "maxLength": 200,
                 "description": "What this file is for and what it should contain, in one sentence."
               },
               "source": {
                 "type": "string",
-                "maxLength": 200,
                 "description": "Where the content should be derived from, if applicable.",
                 "examples": ["Derived from charter.md and constitution.json", "Standard MIT license text", "Runs build_commands from constitution against quality_gate flags from governance"]
               }
@@ -101,7 +97,7 @@
       "type": "object",
       "description": "The technologies in use. Agents use this to calibrate their suggestions and avoid recommending incompatible tools.",
       "required": ["languages"],
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "languages": {
           "type": "array",
@@ -133,12 +129,11 @@
           "items": {
             "type": "object",
             "required": ["name", "purpose"],
-            "additionalProperties": false,
+            "additionalProperties": true,
             "properties": {
               "name": { "type": "string" },
               "purpose": {
                 "type": "string",
-                "maxLength": 100,
                 "description": "What this library is used for."
               },
               "scope": {
@@ -155,7 +150,6 @@
       "type": "array",
       "description": "The non-negotiable values and priorities of this project. These are the 'why behind the rules.' When an agent faces an ambiguous decision, principles are the tiebreaker.",
       "minItems": 1,
-      "maxItems": 10,
       "items": {
         "type": "object",
         "required": ["name", "statement"],
@@ -167,14 +161,12 @@
           },
           "statement": {
             "type": "string",
-            "maxLength": 500,
             "description": "The principle expressed as a clear directive.",
             "examples": ["Reliability is more important than speed of delivery. Never ship something that is not thoroughly tested."]
           },
           "priority": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 10,
             "description": "Relative priority. 1 is highest. When principles conflict, lower number wins."
           }
         },
@@ -184,7 +176,7 @@
     "build_commands": {
       "type": "object",
       "description": "Essential commands agents need to build, test, and validate the project.",
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "install": { "type": "string", "examples": ["pnpm install"] },
         "build": { "type": "string", "examples": ["pnpm build"] },
@@ -198,11 +190,11 @@
           "items": {
             "type": "object",
             "required": ["name", "command", "purpose"],
-            "additionalProperties": false,
+            "additionalProperties": true,
             "properties": {
               "name": { "type": "string" },
               "command": { "type": "string" },
-              "purpose": { "type": "string", "maxLength": 100 }
+              "purpose": { "type": "string" }
             }
           }
         }
