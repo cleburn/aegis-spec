@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://aegis.dev/schema/session.schema.json",
   "title": "Aegis Session Transcript",
-  "description": "A complete transcript of an Aegis discovery session. Session files are stored in .agentpolicy/sessions/ with timestamped filenames (e.g. 2026-03-24_05-38-51.json). They are append-only — prior sessions are never modified. On return visits, Aegis reads all prior transcripts to understand the full history of governance decisions. Session transcripts serve as both the institutional memory of governance reasoning and an auditable record of how and why policy decisions were made.",
+  "description": "A complete transcript of a discovery session that produced or modified an .agentpolicy/ directory. Session files are stored in .agentpolicy/sessions/ with timestamped filenames. They are append-only — prior sessions are never modified. On return visits, the discovery tool reads prior transcripts to understand the full history of governance decisions. Session transcripts serve as both the institutional memory of governance reasoning and an auditable record of how and why policy decisions were made.",
   "type": "object",
   "required": ["timestamp", "messages"],
   "properties": {
@@ -13,7 +13,7 @@
     },
     "messages": {
       "type": "array",
-      "description": "The complete conversation between the human and Aegis, in chronological order. The final entry may be a 'system' role message containing session closing metadata (files created, handoff prompt, deployment intent).",
+      "description": "The complete conversation between the human and the discovery tool, in chronological order. The final entry may be a 'system' role message containing structured session-closing metadata; the exact shape of that metadata is implementation-defined and may include success indicators, failure categories, or other closing context.",
       "items": {
         "type": "object",
         "required": ["role", "content"],
@@ -21,7 +21,7 @@
           "role": {
             "type": "string",
             "enum": ["user", "assistant", "system"],
-            "description": "Who produced this message. 'user' is the human, 'assistant' is Aegis, 'system' is session metadata (e.g. closing guidance)."
+            "description": "Who produced this message. 'user' is the human, 'assistant' is the discovery tool, 'system' is session-level metadata (e.g. closing context)."
           },
           "content": {
             "type": "string",
